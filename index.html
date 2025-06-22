@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子工资单</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      padding-bottom: 60px;
+    }
+    
+    /* 顶部导航栏 */
+    header {
+      background-color: #004f97;
+      color: white;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+    }
+    
+    .back {
+      font-size: 24px;
+      width: 30px;
+    }
+    
+    .home {
+      font-size: 20px;
+      margin-left: 15px;
+    }
+    
+    header h1 {
+      font-size: 18px;
+      text-align: center;
+      flex-grow: 1;
+    }
+    
+    .more {
+      font-size: 24px;
+    }
+    
+    /* 广告横幅 */
+    .banner {
+      background: linear-gradient(to right, #0a66c2, #1288d1);
+      color: white;
+      padding: 12px 15px;
+      margin-top: 50px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .banner-icon {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+    
+    .banner-text {
+      font-size: 14px;
+      flex-grow: 1;
+    }
+    
+    .banner-text strong {
+      font-weight: 600;
+    }
+    
+    .banner-icon-right {
+      font-size: 14px;
+    }
+    
+    /* 查询区域 */
+    .salary-query {
+      background-color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .query-group {
+      display: flex;
+      align-items: center;
+    }
+    
+    .query-group label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .query-group select {
+      border: none;
+      color: #004f97;
+      background: none;
+      font-size: 14px;
+      font-weight: bold;
+      outline: none;
+      margin-left: 5px;
+    }
+    
+    .sound-icon {
+      font-size: 18px;
+      color: #999;
+      margin-left: 15px;
+    }
+    
+    /* 工资列表区域 */
+    .salary-scroll-area {
+      max-height: 55vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .salary-item {
+      background-color: white;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .salary-date {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .salary-details {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    
+    .salary-amount {
+      font-size: 16px;
+      color: #004f97;
+      letter-spacing: 1px;
+    }
+    
+    .salary-date-detail {
+      font-size: 14px;
+      color: #999;
+    }
+    
+    /* 说明区域 */
+    .description {
+      background-color: white;
+      padding: 15px;
+      margin-top: 10px;
+    }
+    
+    .description p {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
+    
+    /* 底部导航栏 */
+    footer {
+      background-color: white;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      border-top: 1px solid #eee;
+      z-index: 100;
+    }
+    
+    footer a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #999;
+      text-decoration: none;
+      position: relative;
+    }
+    
+    footer a.active {
+      color: #004f97;
+    }
+    
+    footer a.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #004f97;
+    }
+    
+    footer a i {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    
+    /* 个人信息弹窗 */
+    .profile-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .profile-content {
+      background-color: white;
+      width: 85%;
+      max-width: 400px;
+      border-radius: 10px;
+      padding: 25px;
+      position: relative;
+    }
+    
+    .profile-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 20px;
+      color: #999;
+    }
+    
+    .profile-title {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 25px;
+      color: #004f97;
+      font-weight: bold;
+    }
+    
+    .profile-info {
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    
+    .profile-info-item {
+      display: flex;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .profile-label {
+      width: 80px;
+      color: #666;
+    }
+    
+    .profile-value {
+      flex: 1;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    /* 加载指示器 */
+    .loading {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #004f97;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header>
+    <span class="back">←</span>
+    <span class="home">⌂</span>
+    <h1>电子工资单</h1>
+    <span class="more">⋯</span>
+  </header>
+
+  <!-- 广告横幅 -->
+  <div class="banner">
+    <span class="banner-icon">🏦</span>
+    <div class="banner-text">
+      <strong>公积金轻松提</strong> 达标千元即领好礼
+    </div>
+    <span class="banner-icon-right">›</span>
+  </div>
+
+  <!-- 工资查询区 -->
+  <div class="salary-query">
+    <div class="query-group">
+      <label for="query-time">查询时间：</label>
+      <select id="query-time">
+        <option value="last-year" selected>近一年</option>
+        <option value="last-3-months">近三个月</option>
+        <option value="custom">自定义</option>
+      </select>
+      <span class="sound-icon">🔊</span>
+    </div>
+  </div>
+
+  <!-- 工资列表（可滑动） -->
+  <div class="salary-scroll-area" id="salaryContainer">
+    <!-- 工资项将通过JavaScript动态添加 -->
+    <div class="loading">
+      <div class="loader"></div>
+    </div>
+  </div>
+
+  <!-- 说明 -->
+  <div class="description">
+    <p>说明：</p>
+    <p>本工资单所有数据由企业用户（即您所在单位）上传，招商银行仅提供信息展示服务，如对内容数据有疑问，请联系您所在单位相关人员。</p>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <footer>
+    <a href="#" class="active">
+      <span>工资单</span>
+    </a>
+    <a href="#" id="profileButton">
+      <span>我的</span>
+    </a>
+  </footer>
+
+  <!-- 个人信息弹窗 -->
+  <div class="profile-modal" id="profileModal">
+    <div class="profile-content">
+      <div class="profile-title">个人信息</div>
+      <div class="profile-close" id="closeProfileModal">×</div>
+      <div class="profile-info">
+        <div class="profile-info-item">
+          <div class="profile-label">姓名</div>
+          <div class="profile-value">唐仲登</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="profile-label">公司</div>
+          <div class="profile-value">广州惠普科技有限公司</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="profile-label">入职时间</div>
+          <div class="profile-value">2024年3月</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 生成4800到5390之间的随机整数函数[1,2,4](@ref)
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    // 生成工资数据（2024年3月至2025年6月）
+    const generateSalaryData = () => {
+      const salaryData = [];
+      
+      // 从2024年3月开始
+      let year = 2024;
+      let month = 3;
+      
+      // 生成到2025年6月
+      for (let i = 0; i < 15; i++) {
+        // 计算支付日期（下个月的10号）
+        let payYear = year;
+        let payMonth = month + 1;
+        
+        if (payMonth > 12) {
+          payYear++;
+          payMonth = 1;
+        }
+        
+        // 格式化显示日期
+        const displayMonth = month < 10 ? `0${month}` : month;
+        const displayPayDate = `${payYear}-${payMonth < 10 ? '0' + payMonth : payMonth}-10`;
+        
+        // 生成4800到5390之间的随机整数[1,2,4](@ref)
+        const randomSalary = getRandomInt(4800, 5390);
+        
+        salaryData.push({
+          year: year,
+          month: month,
+          displayDate: `${year}年${displayMonth}月工资`,
+          payDate: displayPayDate,
+          amount: randomSalary
+        });
+        
+        // 增加月份
+        month++;
+        if (month > 12) {
+          year++;
+          month = 1;
+        }
+      }
+      
+      return salaryData;
+    };
+    
+    // 渲染工资列表
+    const renderSalaryList = () => {
+      const container = document.getElementById('salaryContainer');
+      const salaryData = generateSalaryData();
+      
+      // 排序 - 最新的在最上面
+      salaryData.sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return b.month - a.month;
+      });
+      
+      let salaryHTML = '';
+      salaryData.forEach(item => {
+        salaryHTML += `
+          <div class="salary-item">
+            <div class="salary-date">${item.displayDate}</div>
+            <div class="salary-details">
+              <span class="salary-amount">${item.amount}元</span>
+              <span class="salary-date-detail">${item.payDate}</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      setTimeout(() => {
+        container.innerHTML = salaryHTML;
+      }, 800); // 模拟加载延迟
+    };
+    
+    // 个人资料弹窗控制
+    const setupProfileModal = () => {
+      const profileButton = document.getElementById('profileButton');
+      const profileModal = document.getElementById('profileModal');
+      const closeBtn = document.getElementById('closeProfileModal');
+      
+      profileButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        profileModal.style.display = 'flex';
+      });
+      
+      closeBtn.addEventListener('click', () => {
+        profileModal.style.display = 'none';
+      });
+      
+      profileModal.addEventListener('click', (e) => {
+        if (e.target === profileModal) {
+          profileModal.style.display = 'none';
+        }
+      });
+    };
+    
+    // 初始化页面
+    const initPage = () => {
+      renderSalaryList();
+      setupProfileModal();
+    };
+    
+    // 当页面加载完成后执行初始化
+    window.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>
